@@ -1,4 +1,3 @@
-using NamependingConnector.Web;
 using LabApi.Events.CustomHandlers;
 using LabApi.Features;
 using LabApi.Loader.Features.Plugins;
@@ -8,7 +7,7 @@ namespace NamependingConnector
     public sealed class NamependingPlugin : Plugin<NamependingConfig>
     {
         public static NamependingPlugin Instance { get; private set; }
-
+        
         public static NamependingConfig Cfg => Instance?.Config;
         
         public PlayerEventsHandler PlayerEvents { get; } = new();
@@ -23,6 +22,10 @@ namespace NamependingConnector
         public override void Enable()
         {
             Instance = this;
+            if (Cfg.ApiKey != null && Cfg.ApiUrl != null)
+            {
+                WebClient.Init();
+            }
             CustomHandlersManager.RegisterEventsHandler(PlayerEvents);
             Logger.Info("Namepending Connector started.");
         }

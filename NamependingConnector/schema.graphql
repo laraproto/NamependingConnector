@@ -1,0 +1,200 @@
+"""A ban"""
+type Ban {
+    active: Boolean
+    author: User
+    created: DateTime
+    expires: DateTime
+    id: ID
+    reason: String
+    type: BanType
+    updated: DateTime
+    victim: PlayerMinimal
+}
+
+input BanInput {
+    author: String!
+    duration: Int
+    reason: String!
+    target: String!
+    type: BanType!
+}
+
+"""A ban with minimal information"""
+type BanMinimal {
+    active: Boolean
+    created: DateTime
+    expires: DateTime
+    id: ID
+    reason: String
+    type: BanType
+    updated: DateTime
+}
+
+enum BanType {
+    Permanent
+    Temporary
+}
+
+"""
+The `BigInt` scalar type represents non-fractional signed whole numeric values.
+"""
+scalar BigInt
+
+"""
+A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar Date
+
+"""
+A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar DateTime
+
+"""A game group"""
+type GameGroup {
+    created: DateTime
+    description: String
+    id: ID
+    name: String
+    permissions: [String!]
+    updated: DateTime
+}
+
+"""A group"""
+type Group {
+    created: DateTime
+    description: String
+    gameGroup: GameGroup
+    id: ID
+    name: String
+    permissions: BigInt
+    updated: DateTime
+}
+
+"""Output of account link key creation"""
+type LinkOutput {
+    expires: DateTime
+    key: String
+}
+
+"""Output of lookup key creation"""
+type LookupOutput {
+    expires: DateTime
+    key: String
+}
+
+type Mutation {
+    createAccountLink(platformId: String!): LinkOutput
+    createBan(input: BanInput!): Boolean
+    createLookup(platformId: String!, userIp: String): LookupOutput
+    createOAuthClient(enableEndSession: Boolean! = false, name: String!, skipConsent: Boolean! = false, uris: [String!]!): OAuthClient
+    createPlayer(doNotTrack: Boolean!, name: String!, platformId: String!): Boolean
+    createWarn(input: WarnInput!): Boolean
+    updatePlayer(doNotTrack: Boolean, name: String, platformId: String!, timeSpent: Int! = 0): Boolean
+}
+
+"""An OAuth client"""
+type OAuthClient {
+    client_id: String
+    client_secret: String
+    enable_end_session: Boolean
+    redirect_uris: [String!]
+    skip_consent: Boolean
+}
+
+"""A player"""
+type Player {
+    bans: [BanMinimal!]
+    created: DateTime
+    doNotTrack: Boolean
+    id: ID
+    name: String
+    platformId: String
+    updated: DateTime
+    user: User
+    userId: ID
+    warns: [WarnMinimal!]
+}
+
+"""A player with minimal information"""
+type PlayerMinimal {
+    created: DateTime
+    doNotTrack: Boolean
+    id: ID
+    name: String
+    platformId: String
+    updated: DateTime
+    userId: ID
+}
+
+type Query {
+    bans(platformId: String!): [Ban!]
+    player(platformId: String!): Player
+    self: User
+    server: Server
+    warns(platformId: String!): [Warn!]
+}
+
+"""A server"""
+type Server {
+    created: DateTime
+    creator: UserMinimal
+    description: String
+    id: ID
+}
+
+"""A user"""
+type User {
+    created: DateTime
+    group: Group
+    id: ID
+    name: String
+    updated: DateTime
+}
+
+"""A user with minimal information"""
+type UserMinimal {
+    created: DateTime
+    id: ID
+    name: String
+    updated: DateTime
+}
+
+"""A warn"""
+type Warn {
+    active: Boolean
+    author: User
+    created: DateTime
+    expires: DateTime
+    id: ID
+    reason: String
+    type: WarnType
+    updated: DateTime
+    victim: PlayerMinimal
+}
+
+input WarnInput {
+    author: String!
+    duration: Int
+    reason: String!
+    target: String!
+    type: WarnType!
+}
+
+"""A warn with minimal information"""
+type WarnMinimal {
+    active: Boolean
+    created: DateTime
+    expires: DateTime
+    id: ID
+    reason: String
+    type: WarnType
+    updated: DateTime
+}
+
+enum WarnType {
+    PermanentMajor
+    PermanentMinor
+    TemporaryMajor
+    TemporaryMinor
+}

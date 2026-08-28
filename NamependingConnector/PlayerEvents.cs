@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.CustomHandlers;
 using LabApi.Features.Wrappers;
+using NamependingConnector.Models;
 
 namespace NamependingConnector;
 
@@ -11,9 +13,11 @@ public sealed class PlayerEventsHandler : CustomEventsHandler
     public const string BannedMessage = "You have been banned.";
 
     private const long PermanentBan = 50 * 365 * 24 * 60 * 60;
+    public static Dictionary<string, GetPlayerResponse> Info { get; } = [];
     public static Dictionary<string, float> ToBan { get; } = [];
 
-    public override void OnPlayerPreAuthenticating(PlayerPreAuthenticatingEventArgs ev) => LoadPlayerData(ev.UserId, ev.Flags).ConfigureAwait(false);
+    public override void OnPlayerPreAuthenticating(PlayerPreAuthenticatingEventArgs ev) =>
+        LoadPlayerData(ev.UserId, ev.Flags).ConfigureAwait(false);
 
     public override void OnPlayerJoined(PlayerJoinedEventArgs ev)
     {
@@ -32,21 +36,24 @@ public sealed class PlayerEventsHandler : CustomEventsHandler
         
         if (data == null)
         {
-            WebClientHandler.CreatePlayer(new PlayerCreateRequest(p.Nickname, p.UserId, p.DoNotTrack))
-                .ConfigureAwait(false);
+            /*WebClientHandler.CreatePlayer(new PlayerCreateRequest(p.Nickname, p.UserId, p.DoNotTrack))
+                .ConfigureAwait(false);*/
         }
     }
 
     public override void OnPlayerLeft(PlayerLeftEventArgs ev)
     {
-        if (ev.Player == null)
+        if (ev.Player is null)
             return;
 
         var id = ev.Player.UserId;
-        if (string.IsNullOrEmpty(id) && !Info.Remove(id, out var data))
+        if (string.IsNullOrEmpty(id) || !Info.Remove(id, out var data))
             return;
         
-        WebClientHandler.UpdatePlayer(new PlayerCreateRequest(ev.Player.Nickname, id, ev.Player.DoNotTrack)).ConfigureAwait(false);
+        var roundDuration = Round.Duration.TotalSeconds;
+        var sessionTime = (DateTimeOffset.UtcNow - data.Player.ConnectTime).TotalSeconds;
+        
+        _ = WebClient.UpdatePlayer(id, ev.Player.DoNotTrack, ev.Player.Nickname, (int)Math.Min(sessionTime, roundDuration)).ConfigureAwait(false);
     }
 
     public override void OnPlayerBanning(PlayerBanningEventArgs ev)
@@ -62,28 +69,26 @@ public sealed class PlayerEventsHandler : CustomEventsHandler
         if (string.IsNullOrEmpty(ev.Reason))
             ev.Reason = "No reason provided. Please contact a Head Administrator for further details.";
         
-        var banRequest = new CreateBanRequest(ev.Issuer.UserId, ev.Duration, ev.Player.UserId, ev.Reason, ev.Duration == PermanentBan);
+        /*var banRequest = new CreateBanRequest(ev.Issuer.UserId, ev.Duration, ev.Player.UserId, ev.Reason, ev.Duration == PermanentBan);
         
-        WebClientHandler.CreateBan(banRequest).ConfigureAwait(false);
+        WebClientHandler.CreateBan(banRequest).ConfigureAwait(false);*/
         ev.Player?.Kick("You have been banned: " + ev.Reason);
     }
     
     private static async Task LoadPlayerData(string userId, CentralAuthPreauthFlags flags)
     {
-        var getRequest = new PlayerGetRequest(userId);
-        var data = await WebClientHandler.GetPlayer(getRequest);
+        var data = await WebClient.GetPlayer(userId);
         if (data is null)
             return;
-        Info[userId] = data.Player;
-        if (!data.Success)
-        {
-            return;
-        }
+        Info[userId] = data;
 
-        if (data.BanActive != null && (bool)data.BanActive && (flags & CentralAuthPreauthFlags.IgnoreBans) == 0)
+        Logger.Info($"Loaded player data for {userId}: {data.Player.Id}");
+
+        var isBanned = data.Player.Bans.Any(bansContent => bansContent.Active);
+
+        if (isBanned && (flags & CentralAuthPreauthFlags.IgnoreBans) == 0)
         {
             KickOrQueueBan(userId);
-            return;
         }
     }
 
