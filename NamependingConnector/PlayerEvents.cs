@@ -36,8 +36,8 @@ public sealed class PlayerEventsHandler : CustomEventsHandler
         
         if (data == null)
         {
-            /*WebClientHandler.CreatePlayer(new PlayerCreateRequest(p.Nickname, p.UserId, p.DoNotTrack))
-                .ConfigureAwait(false);*/
+            _ = WebClient.CreatePlayer(p.UserId, p.Nickname, p.DoNotTrack)
+                .ConfigureAwait(false);
         }
     }
 

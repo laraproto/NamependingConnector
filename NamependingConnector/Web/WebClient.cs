@@ -145,4 +145,38 @@ public static class WebClient
         Logger.Error($"Update Player Failed: {platformId}: {string.Join(", ", response.Errors.Select(e => e.Message))}");
         return null;
     }
+    
+    public static async Task<CreatePlayerResponse> CreatePlayer(string platformId, string name, bool doNotTrack)
+    {
+        if (Client == null)
+        {
+            Logger.Error("WebClient is not initialized, cannot run CreatePlayer.");
+            return null;
+        }
+
+        var request = new GraphQLRequest
+        {
+            Query = """
+                    mutation CreatePlayer($platformId: String!, $name: String!, $doNotTrack: Boolean!) {
+                      createPlayer(
+                        platformId: $platformId
+                        name: $name
+                        doNotTrack: $doNotTrack
+                      )
+                    }
+                    """,
+            OperationName = "CreatePlayer",
+            Variables = new { platformId, name, doNotTrack },
+        };
+
+        var response = await Client.SendMutationAsync<CreatePlayerResponse>(request);
+        
+        if (response.Errors is null)
+        {
+            return response.Data;
+        }
+        
+        Logger.Error($"Create Player Failed: {platformId}: {string.Join(", ", response.Errors.Select(e => e.Message))}");
+        return null;
+    }
 }
