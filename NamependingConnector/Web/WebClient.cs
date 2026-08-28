@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GraphQL;
@@ -177,6 +178,71 @@ public static class WebClient
         }
         
         Logger.Error($"Create Player Failed: {platformId}: {string.Join(", ", response.Errors.Select(e => e.Message))}");
+        return null;
+    }
+
+    public static async Task<CreateBanResponse> CreateBan(string author, string target, int duration, string reason,
+        bool permanent)
+    {
+        if (Client == null)
+        {
+            Logger.Error("WebClient is not initialized, cannot run CreateBan.");
+            return null;
+        }
+
+        var request = new GraphQLRequest
+        {
+            Query = """
+                    mutation CreateBan($author: String!, $duration: Int!, $reason: String!, $target: String!, $type: BanType!) {
+                      createBan(
+                        input: {author: $author, reason: $reason, target: $target, type: $type, duration: $duration}
+                      )
+                    }
+                    """,
+            OperationName = "CreateBan",
+            Variables = new { author, target, duration, reason, type = permanent ? "Permanent" : "Temporary" }
+        };
+        
+        var response = await Client.SendMutationAsync<CreateBanResponse>(request);
+        
+        if (response.Errors is null)
+        {
+            return response.Data;
+        }
+        
+        Logger.Error($"Create Ban Failed: {string.Join(", ", response.Errors.Select(e => e.Message))}");
+        return null;
+    }
+
+    public static async Task<CreateWarnResponse> CreateWarn(string author, string target, string reason, string type, int? duration)
+    {
+        if (Client == null)
+        {
+            Logger.Error("WebClient is not initialized, cannot run CreateWarn.");
+            return null;
+        }
+
+        var request = new GraphQLRequest
+        {
+            Query = """
+                    mutation CreateWarn($author: String!, $duration: Int!, $reason: String!, $target: String!, $type: WarnType!) {
+                      createWarn(
+                        input: {author: $author, reason: $reason, target: $target, type: $type, duration: $duration}
+                      )
+                    }
+                    """,
+            OperationName = "CreateWarn",
+            Variables = new { author, target, duration, reason, type = CreateWarnResponse.WarnEnum.GetValueOrDefault(type) }
+        };
+        
+        var response = await Client.SendMutationAsync<CreateWarnResponse>(request);
+        
+        if (response.Errors is null)
+        {
+            return response.Data;
+        }
+        
+        Logger.Error($"Create Warn Failed: {string.Join(", ", response.Errors.Select(e => e.Message))}");
         return null;
     }
 }

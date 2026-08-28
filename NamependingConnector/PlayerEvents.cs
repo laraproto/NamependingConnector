@@ -67,12 +67,10 @@ public sealed class PlayerEventsHandler : CustomEventsHandler
         }
         
         if (string.IsNullOrEmpty(ev.Reason))
-            ev.Reason = "No reason provided. Please contact a Head Administrator for further details.";
+            ev.Reason = "No reason provided.";
         
-        /*var banRequest = new CreateBanRequest(ev.Issuer.UserId, ev.Duration, ev.Player.UserId, ev.Reason, ev.Duration == PermanentBan);
-        
-        WebClientHandler.CreateBan(banRequest).ConfigureAwait(false);*/
-        ev.Player?.Kick("You have been banned: " + ev.Reason);
+        _ = WebClient.CreateBan(ev.Issuer.UserId, ev.Player.UserId, (int)ev.Duration, ev.Reason, ev.Duration == PermanentBan).ConfigureAwait(false);
+        ev.Player.Kick($"You have been banned: {ev.Reason}");
     }
     
     private static async Task LoadPlayerData(string userId, CentralAuthPreauthFlags flags)
@@ -81,8 +79,6 @@ public sealed class PlayerEventsHandler : CustomEventsHandler
         if (data is null)
             return;
         Info[userId] = data;
-
-        Logger.Info($"Loaded player data for {userId}: {data.Player.Id}");
 
         var isBanned = data.Player.Bans.Any(bansContent => bansContent.Active);
 
