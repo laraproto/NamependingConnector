@@ -245,4 +245,42 @@ public static class WebClient
         Logger.Error($"Create Warn Failed: {string.Join(", ", response.Errors.Select(e => e.Message))}");
         return null;
     }
+
+    public static async Task<GetRolesResponse> GetRoles()
+    {
+        if (Client == null)
+        {
+            Logger.Error("WebClient is not initialized, cannot run GetRoles.");
+            return null;
+        }
+
+        var request = new GraphQLRequest
+        {
+            Query = """
+                    query GetRoles {
+                      roles {
+                        id
+                        name
+                        permissions
+                        gameGroup {
+                          id
+                          name
+                          permissions
+                        }
+                      }
+                    }
+                    """,
+            OperationName = "GetRoles"
+        };
+
+        var response = await Client.SendQueryAsync<GetRolesResponse>(request);
+
+        if (response.Errors is null)
+        {
+            return response.Data;
+        }
+
+        Logger.Error($"Get Roles Failed: {string.Join(", ", response.Errors.Select(e => e.Message))}");
+        return null;
+    }
 }

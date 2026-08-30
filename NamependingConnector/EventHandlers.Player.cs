@@ -1,20 +1,15 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.CustomHandlers;
 using LabApi.Features.Wrappers;
-using NamependingConnector.Models;
 
 namespace NamependingConnector;
 
 public sealed class PlayerEventsHandler : CustomEventsHandler
 {
-    public const string BannedMessage = "You have been banned.";
 
     private const long PermanentBan = 50 * 365 * 24 * 60 * 60;
-    public static Dictionary<string, GetPlayerResponse> Info { get; } = [];
-    public static Dictionary<string, float> ToBan { get; } = [];
 
     public override void OnPlayerPreAuthenticating(PlayerPreAuthenticatingEventArgs ev) =>
         LoadPlayerData(ev.UserId, ev.Flags).ConfigureAwait(false);
@@ -22,14 +17,14 @@ public sealed class PlayerEventsHandler : CustomEventsHandler
     public override void OnPlayerJoined(PlayerJoinedEventArgs ev)
     {
         var p = ev.Player;
-        if (ToBan.TryGetValue(p.UserId, out var time) && Time.time - time < 30f)
+        if (PlayerProperties.ToBan.TryGetValue(p.UserId, out var time) && Time.time - time < 30f)
         {
-            p.Kick(BannedMessage);
-            ToBan.Remove(p.UserId);
+            p.Kick(PlayerProperties.BannedMessage);
+            PlayerProperties.ToBan.Remove(p.UserId);
             return;
         }
 
-        if (!Info.TryGetValue(p.UserId, out var data))
+        if (!PlayerProperties.Info.TryGetValue(p.UserId, out var data))
         {
             return;
         }
@@ -47,7 +42,7 @@ public sealed class PlayerEventsHandler : CustomEventsHandler
             return;
 
         var id = ev.Player.UserId;
-        if (string.IsNullOrEmpty(id) || !Info.Remove(id, out var data))
+        if (string.IsNullOrEmpty(id) || !PlayerProperties.Info.Remove(id, out var data))
             return;
         
         var roundDuration = Round.Duration.TotalSeconds;
@@ -78,7 +73,7 @@ public sealed class PlayerEventsHandler : CustomEventsHandler
         var data = await WebClient.GetPlayer(userId);
         if (data is null)
             return;
-        Info[userId] = data;
+        PlayerProperties.Info[userId] = data;
 
         var isBanned = data.Player.Bans.Any(bansContent => bansContent.Active);
 
@@ -91,8 +86,8 @@ public sealed class PlayerEventsHandler : CustomEventsHandler
     public static void KickOrQueueBan(string userId)
     {
         if (Player.TryGet(userId, out var player) && player.IsReady)
-            player.Kick(BannedMessage);
+            player.Kick(PlayerProperties.BannedMessage);
         else
-            ToBan[userId] = Time.time;
+            PlayerProperties.ToBan[userId] = Time.time;
     }
 }

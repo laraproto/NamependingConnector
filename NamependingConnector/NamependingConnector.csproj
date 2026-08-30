@@ -13,6 +13,7 @@
         <Reference Include="System.Memory" />
         <Reference Include="Assembly-CSharp" Publicize="true" />
         <Reference Include="Assembly-CSharp-firstpass" />
+        <Reference Include="Axwabo.Helpers" Private="false"/>
         <Reference Include="CommandSystem.Core" />
         <Reference Include="Mirror" />
         <Reference Include="Pooling" />

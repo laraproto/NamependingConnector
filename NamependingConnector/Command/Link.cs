@@ -39,7 +39,7 @@ public class Link : ICommand
             return false;
         }
 
-        if (PlayerEventsHandler.Info.TryGetValue(hub.authManager.UserId, out var data) && data?.Player.UserId != null)
+        if (PlayerProperties.Info.TryGetValue(hub.authManager.UserId, out var data) && data?.Player.UserId != null)
         {
             response = "You already have a linked panel account. Linking another one will overwrite the previous one.";
         }

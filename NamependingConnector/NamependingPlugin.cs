@@ -11,6 +11,7 @@ namespace NamependingConnector
         public static NamependingConfig Cfg => Instance?.Config;
         
         public PlayerEventsHandler PlayerEvents { get; } = new();
+        public ServerEventHandlers ServerEvents { get; } = new ();
         
         public override string Name => "Namepending";
         public override string Description => "Syncs various things to web panel";
@@ -27,6 +28,7 @@ namespace NamependingConnector
                 WebClient.Init();
             }
             CustomHandlersManager.RegisterEventsHandler(PlayerEvents);
+            CustomHandlersManager.RegisterEventsHandler(ServerEvents);
             Logger.Info("Namepending Connector started.");
         }
 

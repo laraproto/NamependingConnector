@@ -130,6 +130,7 @@ type PlayerMinimal {
 type Query {
     bans(platformId: String!): [Ban!]
     player(platformId: String!): Player
+    roles: [Group!]
     self: User
     server: Server
     warns(platformId: String!): [Warn!]
