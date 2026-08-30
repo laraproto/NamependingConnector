@@ -16,7 +16,7 @@ public class GetRolesResponse
         {
             public string Id;
             public string Name;
-            public string Permissions;
+            public string[] Permissions;
         }
     }
 }

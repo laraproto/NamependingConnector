@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Linq;
 using CommandSystem;
 using LabApi.Features.Wrappers;
+using NamependingConnector.Models;
 using RemoteAdmin;
 
 namespace NamependingConnector.Command;
@@ -21,6 +22,12 @@ public class Warn: ICommand
         if (sender is not PlayerCommandSender {ReferenceHub: var hub} commandSender)
         {
             response = "This command can only be executed by a player.";
+            return false;
+        }
+
+        if (!sender.CheckPermission(Permissions.ViewWarnings))
+        {
+            response = "You do not have permission to use this command.";
             return false;
         }
         

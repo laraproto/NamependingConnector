@@ -30,6 +30,8 @@ public class GetPlayerResponse
             public class GroupContent
             {
                 public string Name;
+                public string Id;
+                public Permissions Permissions;
 
                 public GameGroupContent GameGroup;
         

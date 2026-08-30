@@ -53,6 +53,8 @@ public static class WebClient
                                 name
                                 group {
                                     id
+                                    name
+                                    permissions
                                     gameGroup {
                                         id
                                         name
