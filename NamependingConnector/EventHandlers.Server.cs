@@ -17,6 +17,6 @@ public sealed class ServerEventHandlers : CustomEventsHandler
 
     private static async Task LoadRoleData()
     {
-        
+        var data = await WebClient.GetRoles();
     }
 }
