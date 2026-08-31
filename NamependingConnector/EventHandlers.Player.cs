@@ -26,20 +26,16 @@ public sealed class PlayerEventsHandler : CustomEventsHandler
 
         if (!PlayerProperties.Info.TryGetValue(p.UserId, out var data))
         {
+            _ = WebClient.CreatePlayer(p.UserId, p.Nickname, p.DoNotTrack)
+                .ConfigureAwait(false);
             return;
         }
-
+        
         if (data.Player.User?.Group.GameGroup.Id != null)
         {
             var group = ServerStatic.PermissionsHandler.GetGroup($"RANK-{data.Player.User.Group.GameGroup.Id}");
             p.ReferenceHub.serverRoles.SetGroup(group);
             ServerStatic.PermissionsHandler.Members[p.UserId] = group.Name;
-        }
-
-        if (data == null)
-        {
-            _ = WebClient.CreatePlayer(p.UserId, p.Nickname, p.DoNotTrack)
-                .ConfigureAwait(false);
         }
     }
 

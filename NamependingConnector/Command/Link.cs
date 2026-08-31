@@ -28,7 +28,7 @@ public class Link : ICommand
         var now = new DateTimeOffset(DateTime.UtcNow);
         var interval = startLink.CreateAccountLink.Expires - now;
         
-        player.SendConsoleMessage($"Your link token is {startLink.CreateAccountLink.Key}. Link your account on the panel, code expires in {Math.Round(interval.TotalMinutes)} minutes.");
+        player.SendConsoleMessage($"Your link token is {startLink.CreateAccountLink.Key}. Link your account on the panel in settings, code expires in {Math.Round(interval.TotalMinutes)} minutes.");
     }
     
     public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
