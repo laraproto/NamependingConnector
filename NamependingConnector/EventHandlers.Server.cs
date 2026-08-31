@@ -47,11 +47,14 @@ public sealed class ServerEventHandlers : CustomEventsHandler
             {
                 Name = $"RANK-{roleContent.GameGroup.Id}",
                 Permissions = perm,
-                BadgeColor = "silver",
+                BadgeColor = roleContent.GameGroup.Color,
                 BadgeText = roleContent.GameGroup.Name
             };
-            
-            ServerStatic.PermissionsHandler.Groups.TryAdd(group.Name, group);
+
+            if (!ServerStatic.PermissionsHandler.Groups.TryAdd(group.Name, group))
+            {
+                ServerStatic.PermissionsHandler.Groups[group.Name] = group; //dumb shite, allows refresh
+            }
         }
     }
 }

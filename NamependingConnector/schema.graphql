@@ -52,6 +52,7 @@ scalar DateTime
 
 """A game group"""
 type GameGroup {
+    color: String
     created: DateTime
     description: String
     id: ID

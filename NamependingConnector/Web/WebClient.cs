@@ -266,6 +266,7 @@ public static class WebClient
                         permissions
                         gameGroup {
                           id
+                          color
                           name
                           permissions
                         }
